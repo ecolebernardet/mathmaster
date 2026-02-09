@@ -2,396 +2,371 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OutilsProfs</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MathMaster Ultra - Édition Hybride</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&display=swap');
-        
         :root {
-            --bg-body: #121212;
-            --card-bg: #1e1e1e;
-            --text-main: #ffffff;
-            --text-muted: #a1a1aa;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --shadow-color: rgba(0, 0, 0, 0.4);
-        }
-
-        body.light-mode {
-            --bg-body: #eeeeee;
-            --card-bg: #ffffff;
-            --text-main: #111827;
-            --text-muted: #71717a;
-            --border-color: rgba(0, 0, 0, 0.05);
-            --shadow-color: rgba(0, 0, 0, 0.1);
+            --primary: #6366f1; --secondary: #ec4899; --success: #22c55e;
+            --danger: #ef4444; --warning: #f59e0b;
+            --bg-gradient: linear-gradient(109.6deg, rgb(78, 112, 157) 11.2%, rgb(137, 164, 199) 65%, rgb(205, 213, 224) 100.2%);
         }
 
         body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: var(--bg-body); 
-            color: var(--text-main);
-            transition: background-color 0.3s ease, color 0.3s ease;
-            padding: calc(env(safe-area-inset-top) + 15px) 15px 20px;
+            font-family: 'Poppins', sans-serif; 
+            background: var(--bg-gradient); 
+            height: 100vh; margin: 0; 
+            display: flex; justify-content: center; align-items: center; 
+            overflow: hidden; color: #1e293b; 
+            touch-action: manipulation;
         }
 
-        * {
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        #game-container { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 1.5rem; border-radius: 28px; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3); 
+            width: 90%; max-width: 420px; 
+            text-align: center; position: relative;
+            box-sizing: border-box;
         }
 
-        .menu-card { 
-            position: relative;
-            background: var(--card-bg);
-            border-radius: 1.25rem;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 12px var(--shadow-color);
-            transition: transform 0.2s ease;
-        }
+        .hidden { display: none !important; }
+
+        /* Bars */
+        .progress-container { width: 100%; height: 20px; background: #e2e8f0; border-radius: 10px; margin: 10px 0; overflow: hidden; position: relative; }
+        #progress-bar { width: 100%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.1s linear; }
+        #timer-text { position: absolute; width: 100%; top: 0; left: 0; line-height: 20px; font-size: 0.75rem; font-weight: 800; }
+
+        .precision-track { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; margin-bottom: 10px; overflow: hidden; }
+        #precision-bar { width: 100%; height: 100%; background: var(--success); transition: width 0.3s ease; }
+
+        /* Game Elements */
+        #question { font-size: 3.5rem; font-weight: 800; margin: 0.5rem 0; color: #1e293b; }
         
-        .menu-card:active { 
-            transform: scale(0.96); 
+        #answer { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border: 3px solid #e2e8f0; 
+            border-radius: 15px; 
+            font-size: 2.2rem; 
+            text-align: center; 
+            font-weight: 800;
+            background: #fff; 
+            color: var(--primary); 
+            pointer-events: none;
+            box-sizing: border-box;
+            display: block;
         }
 
-        .icon-box {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(128, 128, 128, 0.1);
-            margin-bottom: 4px;
-            font-size: 22px;
-            border: 1px solid var(--border-color);
+        /* Numpad */
+        #numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .num-btn { 
+            padding: 15px; font-size: 1.5rem; font-weight: 700; background: #f1f5f9; 
+            border: none; border-radius: 15px; cursor: pointer; color: #1e293b;
+            box-shadow: 0 4px 0 #cbd5e1; transition: all 0.05s;
+            user-select: none;
         }
+        .num-btn:active, .num-btn.active-press { transform: translateY(3px); box-shadow: 0 1px 0 #cbd5e1; background: #e0e7ff; }
+        .num-btn.special { background: #e2e8f0; }
+        .num-btn.confirm { background: var(--success); color: white; box-shadow: 0 4px 0 #16a34a; }
 
-        .tile-subtitle {
-            color: var(--text-muted);
-            margin-top: 1px;
-            text-align: center;
-            line-height: 1.1;
-        }
+        /* Animations */
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        .shake { animation: shake 0.3s ease-in-out; }
+        .correct-flash { border-color: var(--success) !important; background-color: #f0fdf4 !important; }
+        .wrong-flash { border-color: var(--danger) !important; background-color: #fef2f2 !important; }
+        
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .pop-animation { animation: popIn 0.2s ease-out; }
 
-        .drag-handle {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: grid;
-            grid-template-columns: repeat(3, 2px);
-            gap: 2px;
-            cursor: grab;
-            opacity: 0.2;
-        }
-
-        .drag-handle span {
-            width: 2px;
-            height: 2px;
-            background-color: var(--text-muted);
-            border-radius: 50%;
-        }
-
-        .ui-btn {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-        }
-
-        .header-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            border: 2px solid var(--card-bg);
-        }
-
-        /* Responsive design pour PC */
-        @media (min-width: 768px) {
-            .icon-box {
-                width: 64px;
-                height: 64px;
-                font-size: 32px;
-                border-radius: 16px;
-                margin-bottom: 12px;
-            }
-        }
+        button.main-btn { background: var(--primary); color: white; border: none; padding: 14px; font-size: 1rem; font-weight: 600; border-radius: 12px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .op-btn { background: #f1f5f9; color: #475569; padding: 10px; font-size: 1.1rem; flex: 1; border-radius: 10px; cursor: pointer; border: none; }
+        .op-btn.active { background: var(--primary); color: white; }
+        .avatar-opt { font-size: 2rem; cursor: pointer; padding: 10px; border-radius: 12px; border: 2px solid transparent; background: #f1f5f9; }
+        .avatar-opt.selected { border-color: var(--primary); background: #e0e7ff; }
     </style>
 </head>
-<body class="flex flex-col items-center">
-    <!-- Chargement du thème avant le rendu -->
-    <script>
-        if (localStorage.getItem('theme_mode') === 'light') {
-            document.body.classList.add('light-mode');
-        }
-    </script>
+<body>
 
-    <div class="w-full max-w-[360px] md:max-w-6xl md:px-6">
-        <!-- En-tête -->
-        <header class="flex justify-between items-center mb-6 px-1">
-            <button onclick="goToSettings()" class="ui-btn active:scale-90" aria-label="Menu paramètres">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
-            <h1 class="text-[13px] md:text-[18px] font-black tracking-[0.4em] uppercase opacity-90">Outils Profs</h1>
-            <img src="outilsprofs_icone.png" alt="Avatar" class="header-avatar">
-        </header>
-
-        <!-- Grille de navigation -->
-        <nav id="grid-menu" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
-            <!-- Ma classe -->
-            <div data-id="inscr" class="menu-card p-3 md:p-6">
-                <div class="drag-handle">
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                </div>
-                <a href="maclasse.html" class="flex flex-col items-center text-center">
-                    <div class="icon-box">📝</div>
-                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Ma classe</h2>
-                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">enregistrement & édition</span>
-                </a>
-            </div>
-
-            <!-- Liens -->
-            <div data-id="liens" class="menu-card p-3 md:p-6">
-                <div class="drag-handle">
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                </div>
-                <a href="liens.html" class="flex flex-col items-center text-center">
-                    <div class="icon-box">🔗</div>
-                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Liens</h2>
-                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">bibliothèque de favoris</span>
-                </a>
-            </div>
-
-            <!-- 108 heures -->
-            <div data-id="h108" class="menu-card p-3 md:p-6">
-                <div class="drag-handle">
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                </div>
-                <a href="108heures.html" class="flex flex-col items-center text-center">
-                    <div class="icon-box">⏱️</div>
-                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">108 heures</h2>
-                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">suivi des réunions</span>
-                </a>
-            </div>
-
-            <!-- Mémos -->
-            <div data-id="memos" class="menu-card p-3 md:p-6">
-                <div class="drag-handle">
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                </div>
-                <a href="memos.html" class="flex flex-col items-center text-center">
-                    <div class="icon-box">📒</div>
-                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Mémos</h2>
-                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">pense-bêtes</span>
-                </a>
-            </div>
-
-            <!-- Tirage -->
-            <div data-id="tirage" class="menu-card p-3 md:p-6">
-                <div class="drag-handle">
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                </div>
-                <a href="tirage.html" class="flex flex-col items-center text-center">
-                    <div class="icon-box">🎲</div>
-                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Tirage</h2>
-                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">nom au hasard</span>
-                </a>
-            </div>
-
-            <!-- Équipes -->
-            <div data-id="equipes" class="menu-card p-3 md:p-6">
-                <div class="drag-handle">
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                </div>
-                <a href="equipes.html" class="flex flex-col items-center text-center">
-                    <div class="icon-box">👥</div>
-                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Équipes</h2>
-                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">groupes équilibrés</span>
-                </a>
-            </div>
-
-            <!-- Observations -->
-            <div data-id="obs" class="menu-card p-3 md:p-6">
-                <div class="drag-handle">
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                </div>
-                <a href="observations.html" class="flex flex-col items-center text-center">
-                    <div class="icon-box">✏️</div>
-                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Observations</h2>
-                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">suivi des élèves</span>
-                </a>
-            </div>
-
-            <!-- Compteur -->
-            <div data-id="compt" class="menu-card p-3 md:p-6">
-                <div class="drag-handle">
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                </div>
-                <a href="compteur.html" class="flex flex-col items-center text-center">
-                    <div class="icon-box">🚥</div>
-                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Compteur</h2>
-                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">comportement</span>
-                </a>
-            </div>
-
-            <!-- Générateurs -->
-            <div data-id="gen" class="menu-card p-3 md:p-6">
-                <div class="drag-handle">
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                </div>
-                <a href="generateurs.html" class="flex flex-col items-center text-center">
-                    <div class="icon-box">🛠️</div>
-                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Générateurs</h2>
-                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">outils pédagogiques</span>
-                </a>
-            </div>
-
-            <!-- Outils -->
-            <div data-id="outils" class="menu-card p-3 md:p-6">
-                <div class="drag-handle">
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                    <span></span><span></span><span></span>
-                </div>
-                <a href="outils.html" class="flex flex-col items-center text-center">
-                    <div class="icon-box">🧰</div>
-                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Outils</h2>
-                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">gestion de la classe</span>
-                </a>
-            </div>
-        </nav>
+<div id="game-container">
+    <div id="custom-modal" class="hidden" onclick="closeModal()" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.96); border-radius: 28px; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; padding: 20px; box-sizing: border-box; cursor: pointer;">
+        <div class="pop-animation" style="text-align: center;">
+            <div style="font-size: 4rem;">⚠️</div>
+            <h3 id="modal-message" style="margin: 15px 0; color: var(--danger); font-size: 1.5rem;">Prénom requis !</h3>
+            <button class="main-btn" style="width: auto; padding: 10px 40px; background: var(--primary);">D'accord</button>
+            <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 15px;">Appuie sur Entrée ou clique pour fermer</p>
+        </div>
     </div>
 
-    <script>
-        // Navigation vers paramètres
-        function goToSettings() {
-            window.location.href = 'parametres.html';
+    <div id="setup-screen">
+        <h1 style="margin:0">MathMaster 🏆</h1>
+        <div style="display: flex; justify-content: center; gap: 10px; margin: 15px 0;">
+            <div class="avatar-opt selected" onclick="selectAvatar(this)">🐱</div>
+            <div class="avatar-opt" onclick="selectAvatar(this)">🐶</div>
+            <div class="avatar-opt" onclick="selectAvatar(this)">🐼</div>
+            <div class="avatar-opt" onclick="selectAvatar(this)">🐵</div>
+			<div class="avatar-opt" onclick="selectAvatar(this)">🐭</div>
+        </div>
+        <input type="text" id="player-name" placeholder="Ton prénom..." style="width:100%; padding:12px; border-radius:12px; border:2px solid #e2e8f0; box-sizing: border-box;">
+        <div style="display:flex; gap:5px; margin: 15px 0;">
+            <button class="op-btn active" onclick="toggleOp(this, '+')">+</button>
+            <button class="op-btn active" onclick="toggleOp(this, '-')">-</button>
+            <button class="op-btn" onclick="toggleOp(this, 'x')">×</button>
+            <button class="op-btn" onclick="toggleOp(this, '÷')">÷</button>
+        </div>
+        <select id="game-mode" style="width:100%; padding:12px; border-radius:12px; border:2px solid #e2e8f0; margin-bottom:10px">
+            <option value="30">⚡ Mode Flash (30s)</option>
+            <option value="60">⏱️ Mode 1 minute</option>
+            <option value="survival">💀 Mode SURVIE</option>
+        </select>
+        <button class="main-btn" onclick="startGame()" style="background: var(--success)">JOUER !</button>
+        <button onclick="showHighScores()" class="main-btn" style="background: #64748b;">🏆 RECORDS</button>
+    </div>
+
+    <div id="game-screen" class="hidden">
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+            <div id="timer-text">--</div>
+        </div>
+        <div class="precision-track"><div id="precision-bar"></div></div>
+        
+        <div style="display:flex; justify-content: space-between; font-weight:800; align-items: center;">
+            <span id="current-avatar" style="font-size: 1.5rem;">🐱</span>
+            <div>
+                <span id="score-val" style="color: var(--success); font-size: 1.5rem;">0</span>
+                <span id="error-val" style="color: var(--danger); font-size: 1.2rem; margin-left:10px">0</span>
+            </div>
+            <button onclick="endGame()" style="padding: 5px 10px; border-radius:8px; border:none; background: #fee2e2; color: var(--danger); font-size: 0.7rem; font-weight:800; cursor:pointer">STOP</button>
+        </div>
+
+        <div id="question">--</div>
+        <input type="text" id="answer" readonly placeholder="?">
+
+        <div id="numpad">
+            <button class="num-btn" data-key="1" onclick="pressKey('1')">1</button>
+            <button class="num-btn" data-key="2" onclick="pressKey('2')">2</button>
+            <button class="num-btn" data-key="3" onclick="pressKey('3')">3</button>
+            <button class="num-btn" data-key="4" onclick="pressKey('4')">4</button>
+            <button class="num-btn" data-key="5" onclick="pressKey('5')">5</button>
+            <button class="num-btn" data-key="6" onclick="pressKey('6')">6</button>
+            <button class="num-btn" data-key="7" onclick="pressKey('7')">7</button>
+            <button class="num-btn" data-key="8" onclick="pressKey('8')">8</button>
+            <button class="num-btn" data-key="9" onclick="pressKey('9')">9</button>
+            <button class="num-btn special" data-key="C" onclick="pressKey('C')">C</button>
+            <button class="num-btn" data-key="0" onclick="pressKey('0')">0</button>
+            <button class="num-btn confirm" data-key="Enter" onclick="checkAnswer()">OK</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <h2 id="result-title">Résultats</h2>
+        <p>Score : <strong id="final-score" style="font-size: 2.5rem; color: var(--primary)">0</strong></p>
+        <p id="final-stats" style="font-weight:600; margin-bottom:10px;"></p>
+        <div style="max-height: 180px; overflow-y: auto; margin-bottom: 15px;">
+            <table class="score-table" style="width:100%"><tbody id="scores-body"></tbody></table>
+        </div>
+        <button class="main-btn" onclick="backToMenu()">Retour</button>
+        <button onclick="clearScores()" style="background: none; border: none; color: #94a3b8; font-size: 0.8rem; cursor: pointer; margin-top: 15px; text-decoration: underline;">Effacer tous les records</button>
+    </div>
+</div>
+
+<script>
+    let score = 0, errors = 0, timeLeft, timerId, currentAnswer, selectedAvatar = "🐱", isSurvival = false;
+    let selectedOps = ['+', '-'];
+
+    // --- GESTION CLAVIER ---
+    document.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('custom-modal');
+        if (!modal.classList.contains('hidden')) {
+            if (e.key === 'Enter') { closeModal(); e.preventDefault(); }
+            return;
         }
 
-        // Palette de couleurs
-        const colorMap = {
-            'red': '#ef4444',
-            'orange': '#f97316',
-            'amber': '#f59e0b',
-            'yellow': '#eab308',
-            'lime': '#84cc16',
-            'green': '#22c55e',
-            'emerald': '#10b981',
-            'teal': '#14b8a6',
-            'cyan': '#06b6d4',
-            'sky': '#0ea5e9',
-            'blue': '#3b82f6',
-            'indigo': '#6366f1',
-            'violet': '#8b5cf6',
-            'purple': '#a855f7',
-            'fuchsia': '#d946ef',
-            'pink': '#ec4899',
-            'rose': '#f43f5e'
-        };
+        if (document.getElementById('game-screen').classList.contains('hidden')) return;
+        
+        let keyToSimulate = null;
+        if (e.key >= '0' && e.key <= '9') { pressKey(e.key); keyToSimulate = e.key; }
+        else if (e.key === 'Enter') { checkAnswer(); keyToSimulate = 'Enter'; }
+        else if (e.key === 'Backspace' || e.key === 'Escape') { pressKey('C'); keyToSimulate = 'C'; }
 
-        // Couleurs par défaut des tuiles
-        const defaultColors = {
-            inscr: 'lime',
-            h108: 'orange',
-            liens: 'indigo',
-            tirage: 'yellow',
-            equipes: 'rose',
-            memos: 'purple',
-            obs: 'green',
-            compt: 'sky',
-            gen: 'cyan',
-            outils: 'blue'
-        };
-
-        // Application des couleurs personnalisées
-        function applyColors() {
-            const isLight = document.body.classList.contains('light-mode');
-            const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || defaultColors;
-
-            document.querySelectorAll('.menu-card').forEach(el => {
-                const id = el.getAttribute('data-id');
-                const colorName = prefs[id] || 'blue';
-                const hexColor = colorMap[colorName];
-                const iconBox = el.querySelector('.icon-box');
-                const title = el.querySelector('h2');
-
-                if (iconBox) {
-                    iconBox.style.backgroundColor = `${hexColor}15`;
-                    iconBox.style.color = hexColor;
-                    iconBox.style.borderColor = `${hexColor}30`;
-                    iconBox.style.boxShadow = !isLight ? `0 0 12px ${hexColor}20` : 'none';
-                }
-                if (title) {
-                    title.style.color = hexColor;
-                }
-            });
-        }
-
-        // Restauration de l'ordre des tuiles
-        function restoreTileOrder() {
-            const gridMenu = document.getElementById('grid-menu');
-            const savedOrder = JSON.parse(localStorage.getItem('menu_order'));
-            
-            if (savedOrder) {
-                savedOrder.forEach(id => {
-                    const tile = document.querySelector(`[data-id="${id}"]`);
-                    if (tile) {
-                        gridMenu.appendChild(tile);
-                    }
-                });
+        if (keyToSimulate) {
+            const btn = document.querySelector(`.num-btn[data-key="${keyToSimulate}"]`);
+            if (btn) {
+                btn.classList.add('active-press');
+                setTimeout(() => btn.classList.remove('active-press'), 100);
             }
         }
+    });
 
-        // Initialisation du drag & drop
-        function initializeSortable() {
-            const gridMenu = document.getElementById('grid-menu');
-            
-            new Sortable(gridMenu, {
-                handle: '.drag-handle',
-                animation: 200,
-                ghostClass: 'opacity-0',
-                onEnd: function() {
-                    const order = Array.from(gridMenu.children).map(child => child.getAttribute('data-id'));
-                    localStorage.setItem('menu_order', JSON.stringify(order));
-                }
-            });
+    // --- MODALE ---
+    function showModal(msg) {
+        document.getElementById('modal-message').innerText = msg;
+        const modal = document.getElementById('custom-modal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('custom-modal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        if(!document.getElementById('setup-screen').classList.contains('hidden')) {
+            document.getElementById('player-name').focus();
         }
+    }
 
-        // Initialisation au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            applyColors();
-            restoreTileOrder();
-            initializeSortable();
-        });
+    // --- LOGIQUE JEU ---
+    function selectAvatar(el) {
+        document.querySelectorAll('.avatar-opt').forEach(opt => opt.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedAvatar = el.innerText;
+    }
 
-        // Application immédiate pour éviter le flash
-        applyColors();
-        restoreTileOrder();
-        initializeSortable();
-    </script>
+    function toggleOp(btn, op) {
+        if (selectedOps.includes(op) && selectedOps.length > 1) {
+            selectedOps = selectedOps.filter(o => o !== op);
+            btn.classList.remove('active');
+        } else if (!selectedOps.includes(op)) {
+            selectedOps.push(op);
+            btn.classList.add('active');
+        }
+    }
+
+    function pressKey(key) {
+        const input = document.getElementById('answer');
+        if (key === 'C') { input.value = ''; } 
+        else if (input.value.length < 5) { input.value += key; }
+    }
+
+    function updatePrecision() {
+        const total = score + errors;
+        const ratio = total > 0 ? (score / total) * 100 : 100;
+        const bar = document.getElementById('precision-bar');
+        bar.style.width = ratio + "%";
+        bar.style.backgroundColor = ratio > 80 ? "var(--success)" : ratio > 50 ? "var(--warning)" : "var(--danger)";
+    }
+
+    function startGame() {
+        const name = document.getElementById('player-name').value.trim();
+        if(!name) return showModal("Prénom requis !");
+        
+        score = 0; errors = 0;
+        document.getElementById('score-val').innerText = "0";
+        document.getElementById('error-val').innerText = "0";
+        document.getElementById('current-avatar').innerText = selectedAvatar;
+        
+        const mode = document.getElementById('game-mode').value;
+        isSurvival = (mode === 'survival');
+        timeLeft = isSurvival ? 0 : parseInt(mode);
+        const initialTime = timeLeft;
+
+        document.getElementById('setup-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        updatePrecision();
+        nextQuestion();
+
+        if(!isSurvival) {
+            if(timerId) clearInterval(timerId);
+            timerId = setInterval(() => {
+                timeLeft -= 0.1;
+                document.getElementById('progress-bar').style.width = (timeLeft / initialTime * 100) + "%";
+                document.getElementById('timer-text').innerText = Math.ceil(timeLeft) + "s";
+                if(timeLeft <= 0) endGame();
+            }, 100);
+        } else {
+            document.getElementById('progress-bar').style.width = "100%";
+            document.getElementById('timer-text').innerText = "💀 SURVIE";
+        }
+    }
+
+    function nextQuestion() {
+        let op = selectedOps[Math.floor(Math.random() * selectedOps.length)];
+        let level = Math.floor(score / 7) + 1;
+        let n1, n2, range = 10 + (level * 5);
+
+        if (op === '+') { n1 = Math.floor(Math.random()*range)+1; n2 = Math.floor(Math.random()*range)+1; currentAnswer = n1+n2; }
+        else if (op === '-') { n1 = Math.floor(Math.random()*range)+5; n2 = Math.floor(Math.random()*n1); currentAnswer = n1-n2; }
+        else if (op === 'x') { n1 = Math.floor(Math.random()*(level+4))+1; n2 = Math.floor(Math.random()*10)+1; currentAnswer = n1*n2; }
+        else { n2 = Math.floor(Math.random()*9)+2; currentAnswer = Math.floor(Math.random()*level)+1; n1 = n2*currentAnswer; op="÷"; }
+        
+        document.getElementById('question').innerText = `${n1} ${op} ${n2}`;
+        document.getElementById('answer').value = '';
+    }
+
+    function checkAnswer() {
+        const input = document.getElementById('answer');
+        const val = parseInt(input.value);
+        if(isNaN(val)) return;
+
+        if(val === currentAnswer) {
+            score++;
+            document.getElementById('score-val').innerText = score;
+            input.classList.add('correct-flash');
+            updatePrecision();
+            setTimeout(() => {
+                input.classList.remove('correct-flash');
+                nextQuestion();
+            }, 100);
+        } else {
+            errors++;
+            document.getElementById('error-val').innerText = errors;
+            document.getElementById('game-container').classList.add('shake');
+            input.classList.add('wrong-flash');
+            updatePrecision();
+            setTimeout(() => {
+                document.getElementById('game-container').classList.remove('shake');
+                input.classList.remove('wrong-flash');
+                if(isSurvival) endGame(); else nextQuestion();
+            }, 500);
+        }
+    }
+
+    function endGame() {
+        clearInterval(timerId);
+        const name = document.getElementById('player-name').value;
+        let scores = JSON.parse(localStorage.getItem('mathMasterScores') || '[]');
+        scores.push({ name: name, score: score, avatar: selectedAvatar });
+        scores.sort((a,b) => b.score - a.score);
+        localStorage.setItem('mathMasterScores', JSON.stringify(scores.slice(0,10)));
+
+        document.getElementById('final-score').innerText = score;
+        const total = score + errors;
+        const precision = total > 0 ? Math.round((score / total) * 100) : 0;
+        document.getElementById('final-stats').innerHTML = `<span style="color:var(--danger)">${errors} erreurs</span> • <span style="color:var(--success)">${precision}% de précision</span>`;
+        
+        updateScoreTable();
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        if(score > 0) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    }
+
+    function updateScoreTable() {
+        let scores = JSON.parse(localStorage.getItem('mathMasterScores') || '[]');
+        const body = document.getElementById('scores-body');
+        body.innerHTML = scores.map((s, idx) => `<tr><td>${idx+1}. ${s.avatar} ${s.name}</td><td>${s.score} pts</td></tr>`).join('');
+        if(scores.length === 0) body.innerHTML = "<tr><td colspan='2'>Aucun record</td></tr>";
+    }
+
+    function clearScores() {
+        if (confirm("Effacer tous les records ?")) {
+            localStorage.removeItem('mathMasterScores');
+            updateScoreTable();
+        }
+    }
+
+    function showHighScores() {
+        updateScoreTable();
+        document.getElementById('result-title').innerText = "Records";
+        document.getElementById('setup-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+    }
+
+    function backToMenu() {
+        document.getElementById('result-screen').classList.add('hidden');
+        document.getElementById('setup-screen').classList.remove('hidden');
+    }
+</script>
 </body>
 </html>
