@@ -1559,6 +1559,9 @@
             </div>
 
             <button class="btn btn-success" onclick="startGame()"><i class="fas fa-play"></i> Commencer</button>
+			<button id="install-btn" class="btn btn-primary hidden" style="background-color: #6366f1; border-color: #4f46e5;">
+				<i class="fas fa-download"></i> Installer l'application
+			</button>
             <button class="btn btn-secondary" onclick="showHighScores()"><i class="fas fa-trophy"></i> Classement</button>
         </div>
 
@@ -2068,6 +2071,38 @@
     // ===== INITIALIZATION =====
     loadStats();
     document.getElementById('player-name').focus();
+	
+	let deferredPrompt;
+const installBtn = document.getElementById('install-btn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Empêche Chrome d'afficher sa propre bannière automatique
+    e.preventDefault();
+    // Stocke l'événement pour l'utiliser plus tard
+    deferredPrompt = e;
+    // Affiche notre bouton personnalisé
+    installBtn.classList.remove('hidden');
+});
+
+installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        // Affiche la boîte de dialogue d'installation
+        deferredPrompt.prompt();
+        // Attend la réponse de l'utilisateur
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`L'utilisateur a répondu : ${outcome}`);
+        // On réinitialise la variable
+        deferredPrompt = null;
+        // On cache le bouton
+        installBtn.classList.add('hidden');
+    }
+});
+
+// Cache le bouton si l'app est déjà installée
+window.addEventListener('appinstalled', () => {
+    installBtn.classList.add('hidden');
+    console.log('Application installée avec succès !');
+});
 	
 	// Enregistrement du Service Worker
 		if ('serviceWorker' in navigator) {
