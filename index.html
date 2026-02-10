@@ -390,7 +390,7 @@
             background: rgba(255, 255, 255, 0.03);
             border: 2px solid rgba(148, 163, 184, 0.25);
             border-radius: 18px;
-            font-size: clamp(1.9rem, 3.5vw, 1.6rem);
+            font-size: clamp(1.5rem, 3.5vw, 1.6rem);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -398,7 +398,7 @@
             transition: var(--transition);
             position: relative;
             overflow: hidden;
-			aspect-ratio: 1.5;
+			aspect-ratio: 2;
         }
 
         .avatar-btn::before {
@@ -508,16 +508,16 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-bottom: 1.2rem;
+            margin-bottom: 1.0rem;
         }
 
         .difficulty-btn {
-            padding: 12px;
+            padding: 5px;
             background: rgba(255, 255, 255, 0.05);
             border: 2px solid rgba(148, 163, 184, 0.25);
             border-radius: 12px;
             color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
@@ -526,8 +526,8 @@
 
         .difficulty-btn .icon {
             display: block;
-            font-size: 1.5rem;
-            margin-bottom: 4px;
+            font-size: 1.2rem;
+            margin-bottom: 2px;
         }
 
         .difficulty-btn.easy { border-color: rgba(16, 185, 129, 0.3); }
