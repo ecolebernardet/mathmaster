@@ -7,6 +7,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#6366f1">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<link rel="apple-touch-icon" href="icon-192.png">
     <style>
         * {
             margin: 0;
@@ -362,7 +367,7 @@
 
         .avatar-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(15px, 1fr));
             gap: 10px;
             margin-bottom: 0.5rem;
         }
@@ -2050,6 +2055,15 @@
     // ===== INITIALIZATION =====
     loadStats();
     document.getElementById('player-name').focus();
+	
+	// Enregistrement du Service Worker
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', () => {
+				navigator.serviceWorker.register('./sw.js')
+					.then(reg => console.log('SW enregistré !'))
+					.catch(err => console.log('Erreur SW:', err));
+		});
+		}
 </script>
 </body>
 </html>
