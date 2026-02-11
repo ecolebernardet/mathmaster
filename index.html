@@ -1858,44 +1858,202 @@
     }
 
     function nextQuestion() {
-        let op = selectedOps[Math.floor(Math.random() * selectedOps.length)];
-        let level = Math.floor(score / 7) + 1;
-        
-        // Difficulty multipliers
-        const diffMultiplier = {
-            'easy': 0.7,
-            'medium': 1,
-            'hard': 1.5
-        };
-        
-        let range = Math.floor((10 + (level * 5)) * diffMultiplier[difficulty]);
-        let n1, n2;
-
-        if (op === '+') { 
-            n1 = Math.floor(Math.random()*range)+1; 
-            n2 = Math.floor(Math.random()*range)+1; 
-            currentAnswer = n1+n2; 
-        }
-        else if (op === '-') { 
-            n1 = Math.floor(Math.random()*range)+5; 
-            n2 = Math.floor(Math.random()*n1); 
-            currentAnswer = n1-n2; 
-        }
-        else if (op === 'x') { 
-            n1 = Math.floor(Math.random()*(level+4))+1; 
-            n2 = Math.floor(Math.random()*10)+1; 
-            currentAnswer = n1*n2; 
-        }
-        else { 
-            n2 = Math.floor(Math.random()*9)+2; 
-            currentAnswer = Math.floor(Math.random()*level)+1; 
-            n1 = n2*currentAnswer; 
-            op="÷"; 
-        }
-        
-        document.getElementById('question').innerText = `${n1} ${op} ${n2}`;
-        document.getElementById('answer').value = '';
+    let op = selectedOps[Math.floor(Math.random() * selectedOps.length)];
+    
+    // ===== SYSTÈME DE PALIERS DE DIFFICULTÉ =====
+    // Progression claire par tranches de 10 points
+    let difficultyLevel = 1;
+    
+    if (score >= 0 && score <= 10) {
+        difficultyLevel = 1; // Très facile - Découverte
+    } else if (score >= 11 && score <= 20) {
+        difficultyLevel = 2; // Facile - Apprentissage
+    } else if (score >= 21 && score <= 30) {
+        difficultyLevel = 3; // Moyen - Maîtrise
+    } else if (score >= 31 && score <= 40) {
+        difficultyLevel = 4; // Difficile - Expert
+    } else {
+        difficultyLevel = 5; // Très difficile - Maître
     }
+    
+    // Modificateurs selon le niveau choisi par le joueur
+    const diffMultiplier = {
+        'easy': 0.7,    // 30% plus facile
+        'medium': 1,     // Difficulté standard
+        'hard': 1.3      // 30% plus difficile
+    };
+    
+    let n1, n2;
+    const multiplier = diffMultiplier[difficulty];
+
+    // ===== ADDITION =====
+    if (op === '+') {
+        if (difficultyLevel === 1) {
+            // 0-10 pts: additions simples (1-10) + (1-10)
+            // Exemples: 3+5, 7+2, 9+4
+            n1 = Math.floor(Math.random() * 10 * multiplier) + 1;
+            n2 = Math.floor(Math.random() * 10 * multiplier) + 1;
+        } else if (difficultyLevel === 2) {
+            // 11-20 pts: additions moyennes (1-20) + (1-20)
+            // Exemples: 15+8, 12+17, 19+6
+            n1 = Math.floor(Math.random() * 20 * multiplier) + 1;
+            n2 = Math.floor(Math.random() * 20 * multiplier) + 1;
+        } else if (difficultyLevel === 3) {
+            // 21-30 pts: additions plus grandes (1-50) + (1-50)
+            // Exemples: 35+28, 42+19, 48+37
+            n1 = Math.floor(Math.random() * 50 * multiplier) + 1;
+            n2 = Math.floor(Math.random() * 50 * multiplier) + 1;
+        } else if (difficultyLevel === 4) {
+            // 31-40 pts: grandes additions (1-100) + (1-100)
+            // Exemples: 67+84, 92+55, 78+91
+            n1 = Math.floor(Math.random() * 100 * multiplier) + 1;
+            n2 = Math.floor(Math.random() * 100 * multiplier) + 1;
+        } else {
+            // 41+ pts: très grandes additions (1-150) + (1-150)
+            // Exemples: 128+97, 145+123, 137+108
+            n1 = Math.floor(Math.random() * 150 * multiplier) + 1;
+            n2 = Math.floor(Math.random() * 150 * multiplier) + 1;
+        }
+        currentAnswer = n1 + n2;
+    }
+    
+    // ===== SOUSTRACTION =====
+    else if (op === '-') {
+        if (difficultyLevel === 1) {
+            // 0-10 pts: soustractions simples (résultat positif ≤ 10)
+            // Exemples: 12-5, 15-8, 10-3
+            n1 = Math.floor(Math.random() * 15 * multiplier) + 5;
+            n2 = Math.floor(Math.random() * Math.min(10, n1));
+        } else if (difficultyLevel === 2) {
+            // 11-20 pts: soustractions moyennes
+            // Exemples: 25-12, 30-18, 28-9
+            n1 = Math.floor(Math.random() * 30 * multiplier) + 10;
+            n2 = Math.floor(Math.random() * (n1 - 5));
+        } else if (difficultyLevel === 3) {
+            // 21-30 pts: soustractions plus grandes
+            // Exemples: 65-28, 58-39, 72-45
+            n1 = Math.floor(Math.random() * 70 * multiplier) + 20;
+            n2 = Math.floor(Math.random() * (n1 - 10));
+        } else if (difficultyLevel === 4) {
+            // 31-40 pts: grandes soustractions
+            // Exemples: 115-67, 98-54, 132-89
+            n1 = Math.floor(Math.random() * 120 * multiplier) + 30;
+            n2 = Math.floor(Math.random() * (n1 - 15));
+        } else {
+            // 41+ pts: très grandes soustractions
+            // Exemples: 187-98, 215-137, 195-128
+            n1 = Math.floor(Math.random() * 200 * multiplier) + 50;
+            n2 = Math.floor(Math.random() * (n1 - 20));
+        }
+        currentAnswer = n1 - n2;
+    }
+    
+    // ===== MULTIPLICATION =====
+    else if (op === 'x') {
+        if (difficultyLevel === 1) {
+            // 0-10 pts: tables de 1 à 5
+            // Exemples: 3×4, 2×5, 5×6
+            n1 = Math.floor(Math.random() * 5 * multiplier) + 1;
+            n2 = Math.floor(Math.random() * 10) + 1;
+        } else if (difficultyLevel === 2) {
+            // 11-20 pts: tables de 1 à 10
+            // Exemples: 7×8, 6×9, 9×7
+            n1 = Math.floor(Math.random() * 10 * multiplier) + 1;
+            n2 = Math.floor(Math.random() * 10) + 1;
+        } else if (difficultyLevel === 3) {
+            // 21-30 pts: tables jusqu'à 15
+            // Exemples: 12×8, 11×9, 14×7
+            n1 = Math.floor(Math.random() * 15 * multiplier) + 1;
+            n2 = Math.floor(Math.random() * 12) + 1;
+        } else if (difficultyLevel === 4) {
+            // 31-40 pts: multiplications plus complexes
+            // Exemples: 18×12, 16×14, 19×11
+            n1 = Math.floor(Math.random() * 20 * multiplier) + 1;
+            n2 = Math.floor(Math.random() * 15) + 1;
+        } else {
+            // 41+ pts: grandes multiplications
+            // Exemples: 23×17, 21×19, 24×16
+            n1 = Math.floor(Math.random() * 25 * multiplier) + 1;
+            n2 = Math.floor(Math.random() * 20) + 1;
+        }
+        currentAnswer = n1 * n2;
+    }
+    
+    // ===== DIVISION =====
+    else {
+        if (difficultyLevel === 1) {
+            // 0-10 pts: divisions simples (tables de 2 à 5)
+            // Exemples: 12÷3, 20÷4, 15÷5
+            n2 = Math.floor(Math.random() * 4 * multiplier) + 2;  // Diviseur de 2 à 5
+            currentAnswer = Math.floor(Math.random() * 8) + 1;     // Résultat de 1 à 8
+        } else if (difficultyLevel === 2) {
+            // 11-20 pts: divisions moyennes (tables de 2 à 8)
+            // Exemples: 48÷6, 56÷7, 64÷8
+            n2 = Math.floor(Math.random() * 7 * multiplier) + 2;  // Diviseur de 2 à 8
+            currentAnswer = Math.floor(Math.random() * 10) + 1;    // Résultat de 1 à 10
+        } else if (difficultyLevel === 3) {
+            // 21-30 pts: divisions plus grandes
+            // Exemples: 90÷9, 108÷12, 120÷10
+            n2 = Math.floor(Math.random() * 9 * multiplier) + 2;  // Diviseur de 2 à 10
+            currentAnswer = Math.floor(Math.random() * 15) + 1;    // Résultat de 1 à 15
+        } else if (difficultyLevel === 4) {
+            // 31-40 pts: grandes divisions
+            // Exemples: 156÷12, 180÷15, 192÷16
+            n2 = Math.floor(Math.random() * 11 * multiplier) + 2; // Diviseur de 2 à 12
+            currentAnswer = Math.floor(Math.random() * 20) + 1;    // Résultat de 1 à 20
+        } else {
+            // 41+ pts: très grandes divisions
+            // Exemples: 300÷15, 350÷17, 384÷16
+            n2 = Math.floor(Math.random() * 14 * multiplier) + 2; // Diviseur de 2 à 15
+            currentAnswer = Math.floor(Math.random() * 25) + 1;    // Résultat de 1 à 25
+        }
+        n1 = n2 * currentAnswer;
+        op = "÷";
+    }
+    
+    document.getElementById('question').innerText = `${n1} ${op} ${n2}`;
+    document.getElementById('answer').value = '';
+}
+
+// ===== EXPLICATIONS DU SYSTÈME =====
+/*
+PROGRESSION PAR PALIERS:
+
+Niveau 1 (0-10 points) - DÉCOUVERTE:
+- Addition: 1-10 + 1-10 (max 20)
+- Soustraction: résultats ≤ 10
+- Multiplication: tables de 1-5
+- Division: diviseurs 2-5, résultats ≤ 8
+
+Niveau 2 (11-20 points) - APPRENTISSAGE:
+- Addition: 1-20 + 1-20 (max 40)
+- Soustraction: nombres jusqu'à 30
+- Multiplication: tables de 1-10
+- Division: diviseurs 2-8, résultats ≤ 10
+
+Niveau 3 (21-30 points) - MAÎTRISE:
+- Addition: 1-50 + 1-50 (max 100)
+- Soustraction: nombres jusqu'à 70
+- Multiplication: jusqu'à 15×12
+- Division: diviseurs 2-10, résultats ≤ 15
+
+Niveau 4 (31-40 points) - EXPERT:
+- Addition: 1-100 + 1-100 (max 200)
+- Soustraction: nombres jusqu'à 120
+- Multiplication: jusqu'à 20×15
+- Division: diviseurs 2-12, résultats ≤ 20
+
+Niveau 5 (41+ points) - MAÎTRE:
+- Addition: 1-150 + 1-150 (max 300)
+- Soustraction: nombres jusqu'à 200
+- Multiplication: jusqu'à 25×20
+- Division: diviseurs 2-15, résultats ≤ 25
+
+MODIFICATEURS DE DIFFICULTÉ:
+- Facile: ×0.7 (30% plus facile)
+- Moyen: ×1.0 (normal)
+- Difficile: ×1.3 (30% plus difficile)
+*/
 
     function checkAnswer() {
         const input = document.getElementById('answer');
